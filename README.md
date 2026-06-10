@@ -17,3 +17,6 @@ Deze repository bevat de broncode voor een educatieve webapplicatie die is ontwo
 
 1. Open een webbrowser en ga naar [http://localhost:8000](http://localhost:8000) om de applicatie te bekijken.
 2. Om phpMyAdmin te gebruiken, ga naar [http://localhost:8080](http://localhost:8080).
+(tekst uit originale Rep)
+
+Ik ga mee oevenen met cyber security en de code verbeteren
