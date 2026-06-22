@@ -12,9 +12,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // kwetsbaar voor SQL injectie
-    $sql = "SELECT * FROM user WHERE username = '$username' AND password = '$password'";
-    $result = $pdo->query($sql);
+    $sql = "SELECT * FROM user WHERE username = ? AND password = ?";
+    $result = $pdo->prepare($sql);
+    $result->execute([$username, $password]);
     $user = $result->fetch();
 
     // Controleer of er een rij is gevonden
