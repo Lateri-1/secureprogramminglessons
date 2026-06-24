@@ -21,7 +21,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error = "De wachtwoorden komen niet overeen";
     }
 }
+function validatePassword($password) {
+        // Regular expression for strong password
+        // min 8 char, 1 small letter, 1 big letter, 1 number, 1 special char
+        $pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$/';
 
+        if (preg_match($pattern, $password)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -61,6 +71,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium text-gray-700">Wachtwoord:</label>
                 <input type="password" id="password" name="password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p class="text-gray-700 font-medium mb-2">
+                    Het wachtwoord moet minimaal voldoen aan:
+                </p>
+
+                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                    <li>Minstens 8 tekens lang</li>
+                    <li>Ten minste één kleine letter</li>
+                    <li>Ten minste één hoofdletter</li>
+                    <li>Ten minste één cijfer</li>
+                    <li>Ten minste één speciaal teken (@, $, !, %, *, ?, &)</li>
+                </ul>
             </div>
             <div class="mb-6">
                 <label for="passwordcheck" class="block text-sm font-medium text-gray-700">Herhaal wachtwoord:</label>
