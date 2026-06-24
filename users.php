@@ -1,12 +1,16 @@
 <?php
 session_start();
 include 'includes/db.php';
-
 if(!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true){
     header("location: index.php");
     exit;
 }
-
+// if user is not an admin, he is cooked
+$admcookie = $pdo -> prepare("SELECT isAdmin FROM user")
+$admcookie->execute();
+if($admcookie !== 1) {
+    die('Access denied');
+}
 // show users
 
 $stmt = $pdo->prepare("SELECT * FROM user");

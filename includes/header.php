@@ -14,7 +14,7 @@ if (isset($_SESSION['loggedin'])) {
         <?php if (isset($_SESSION['loggedin'])): ?>
             <div class="text-right">
                 <p class="text-gray-500 text-sm">Welkom,  <a href="transacties.php?id=<?= $userId ?>" class="text-blue-600 hover:underline"><?= $username ?></a></p>
-               
+                
             </div>
         <?php endif; ?>
     </div>
