@@ -6,59 +6,71 @@ include 'includes/db.php';
 include 'includes/userTable.php';
 include 'includes/transactionTable.php';
 
+$error = '';
+
 //Controleer of post is geset
-if($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Gebruikersnaam en wachtwoord uit post halen
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    $sql = "SELECT * FROM user WHERE username = ? AND password = ?";
-    $result = $pdo->prepare($sql);
-    $result->execute([$username, $password]);
-    $user = $result->fetch();
-
-    // Controleer of er een rij is gevonden
-    if($result->rowCount() > 0) {
-        // Gebruiker is ingelogd
-        $_SESSION['loggedin'] = true;
-        $_SESSION['username'] = $username;
-        $_SESSION['user'] = $user;
-
-        header("location: dashboard.php");
+    if ($username === '' || $password === '') {
+        $error = "Vul zowel gebruikersnaam als wachtwoord in";
     } else {
-        // Gebruiker is niet ingelogd
-        $error = "Gebruikersnaam of wachtwoord is onjuist";
-    }
+        // Zoek de gebruiker ALLEEN op username (nooit op wachtwoord in de query!)
+        $sql = "SELECT * FROM user WHERE username = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
 
+        // Vergelijk het ingevoerde wachtwoord met de opgeslagen hash
+        if ($user && password_verify($password, $user['password'])) {
+            // Voorkom session fixation
+            session_regenerate_id(true);
+
+            $_SESSION['loggedin'] = true;
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_id'] = $user['id'];
+
+            header("location: dashboard.php");
+            exit; // stop de scriptuitvoering na een redirect
+        } else {
+            $error = "Gebruikersnaam of wachtwoord is onjuist";
+        }
+    }
 }
 
 ?>
 
 <!DOCTYPE html>
 <html lang="nl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Omanido</title>
-    <!-- Voeg Tailwind CSS toe via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
 <body class="bg-gray-100">
     <?php include 'includes/header.php'; ?>
 
     <div class="container mx-auto mt-20 p-6 bg-white max-w-sm shadow-md rounded-md">
         <div class="flex justify-center">
-            <img src="img/Omanido1.png" alt="Omanido Logo" class="mb-6 w-1/2"> <!-- Aanpassen van de breedte naar 1/2 van de container -->
+            <img src="img/Omanido1.png" alt="Omanido Logo" class="mb-6 w-1/2">
         </div>
         <h2 class="text-lg text-center font-bold mb-6">Inloggen bij Omanido</h2>
-        <form action="<? echo htmlspecialchars($_SERVER["PHP_SELF"]);  ?>" method="post">
+
+        <?php if ($error): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">Fout!</strong>
+                <span class="block sm:inline"><?= htmlspecialchars($error) ?></span>
+            </div>
+        <?php endif; ?>
+
+        <form action="<?= htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="post">
             <div class="mb-4">
                 <label for="username" class="block text-sm font-medium text-gray-700">Gebruikersnaam:</label>
-                <input type="text" id="username" name="username" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" id="username" name="username"
+                    value="<?= htmlspecialchars($username ?? '') ?>"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium text-gray-700">Wachtwoord:</label>
-                <input type="password" id="password" name="password" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <input type="password" id="password" name="password"
+                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <input type="submit" value="Inloggen" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline">
         </form>
